@@ -12,30 +12,30 @@ def write_arithmetic(arg, count):
         asm_cmds = univar + 'M=-M\n'
     elif arg == 'eq':
         asm_cmds = bivar + 'D=M-D\n'
-        asm_cmds += '@EQ_TRUE.{}\n'.format(count)
+        asm_cmds += '@RET_ADDRESS_EQ.{}\n'.format(count)
         asm_cmds += 'D;JEQ\n@SP\nA=M-1\nM=0\n'
-        asm_cmds += '@EQ_END.{}\n0;JMP\n'.format(count)
-        asm_cmds += '(EQ_TRUE.{})\n'.format(count)
+        asm_cmds += '@END_EQ\n0;JMP\n'
+        asm_cmds += '(RET_ADDRESS_EQ.{})\n'.format(count)
         asm_cmds += '@SP\nA=M-1\nM=-1\n'
-        asm_cmds += '(EQ_END.{})\n'.format(count)
+        asm_cmds += '(END_EQ)\n'
         count += 1
     elif arg == 'gt':
         asm_cmds = bivar + 'D=M-D\n'
-        asm_cmds += '@GT_TRUE.{}\n'.format(count)
+        asm_cmds += '@RET_ADDRESS_GT.{}\n'.format(count)
         asm_cmds += 'D;JGT\n@SP\nA=M-1\nM=0\n'
-        asm_cmds += '@GT_END.{}\n0;JMP\n'.format(count)
-        asm_cmds += '(GT_TRUE.{})\n'.format(count)
+        asm_cmds += '@END_GT\n0;JMP\n'
+        asm_cmds += '(RET_ADDRESS_GT.{})\n'.format(count)
         asm_cmds += '@SP\nA=M-1\nM=-1\n'
-        asm_cmds += '(GT_END.{})\n'.format(count)
+        asm_cmds += '(END_GT)\n'
         count += 1
     elif arg == 'lt':
         asm_cmds = bivar + 'D=M-D\n'
-        asm_cmds += '@LT_TRUE.{}\n'.format(count)
+        asm_cmds += '@RET_ADDRESS_LT.{}\n'.format(count)
         asm_cmds += 'D;JLT\n@SP\nA=M-1\nM=0\n'
-        asm_cmds += '@LT_END.{}\n0;JMP\n'.format(count)
-        asm_cmds += '(LT_TRUE.{})\n'.format(count)
+        asm_cmds += '@END_LT\n0;JMP\n'
+        asm_cmds += '(RET_ADDRESS_LT.{})\n'.format(count)
         asm_cmds += '@SP\nA=M-1\nM=-1\n'
-        asm_cmds += '(LT_END.{})\n'.format(count)
+        asm_cmds += '(END_LT)\n'
         count += 1
     elif arg == 'and':
         asm_cmds = bivar + 'M=D&M\n'
@@ -105,8 +105,8 @@ def write_function(arg1, arg2):
     return asm_cmds
 
 
-def write_call(arg1, arg2):
-    asm_cmds = '@SP\nM=M+1\nA=M-1\nM=1'
+def write_call(arg1, arg2, count):
+    asm_cmds = '@RET_ADDRESS_CALL.{}\nD=M\n@SP\nM=M+1\nA=M-1\nM=D\n'.format(count)
     asm_cmds += '@LCL\nD=M\n@SP\nM=M+1\nA=M-1\nM=D\n'  # save LCL
     asm_cmds += '@ARG\nD=M\n@SP\nM=M+1\nA=M-1\nM=D\n'  # save ARG
     asm_cmds += '@THIS\nD=M\n@SP\nM=M+1\nA=M-1\nM=D\n'  # save THIS
@@ -115,6 +115,7 @@ def write_call(arg1, arg2):
     asm_cmds += '@SP\nD=M-D\n@ARG\nM=D\n'  # ARG = SP-5-nArgs
     asm_cmds += '@SP\nD=M\n@LCL\nM=D\n'  # LCL = SP
     write_goto(arg1)
+    write_label('RET_ADDRESS_CALL.{}'.format(count))
     return asm_cmds
 
 
